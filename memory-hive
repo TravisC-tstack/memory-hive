@@ -3228,13 +3228,13 @@ _mh_dedup_normalize() {
     [ -n "$_txt" ] || return 0
     _stop="$(_mh_dedup_stopwords | tr '\n' ' ')"
     printf '%s' "$_txt" \
-        | tr '[:upper:]' '[:lower:]' \
-        | tr -c 'a-z0-9' ' ' \
-        | tr -s ' ' '\n' \
         | awk -v stop=" $_stop " '
-            NF && length($0) > 1 {
-                pat = " " $0 " "
-                if (index(stop, pat) == 0) print $0
+            {
+                gsub(/[^a-zA-Z0-9]/, " ")
+                n = split($0, w, /[ ]+/)
+                for (i = 1; i <= n; i++)
+                    if (length(w[i]) > 1 && index(stop, " " tolower(w[i]) " ") == 0)
+                        printf "%s\n", tolower(w[i])
             }
         ' \
         | sort -u \
